@@ -1,0 +1,212 @@
+<html>
+
+<head>
+    <title>スターリングエンジン簡易性能予測法</title>
+    <style>
+        h3 {
+            margin: 0.1em;
+            padding: 0.1em;
+        }
+
+        ul.text>li {
+            font-size: 70%;
+        }
+
+        span.it {
+            display: inline-block;
+            width: 12em;
+            line-height: 1.5em;
+        }
+
+        span.its {
+            width: 6em;
+        }
+
+        span.rt {
+            display: inline-block;
+            width: 15em;
+            line-height: 1.5em;
+        }
+
+        span.rv {
+            display: inline-block;
+            width: 4em;
+            padding: 0.3em;
+            line-height: 1em;
+            background-color: aquamarine;
+        }
+
+
+        span.addText {
+            padding-left: 5em;
+            display: inline-block;
+            color: darkmagenta;
+            font-size: 90%;
+        }
+
+        span.addRow {
+            padding-left: 5em;
+            display: block;
+        }
+
+        input[type="number"] {
+            width: 8em;
+        }
+
+        .addV {
+            background-color: lightpink;
+        }
+
+        span.addV {
+            background-color: lightsalmon;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>スターリングエンジン簡易性能予測法</h2>
+    <hr>
+    <h3>定義</h3>
+    <ul class="text">
+        <li>高温度差エンジン:1000℃程度の燃焼ガスを利用/低温度差エンジン:100～400℃の熱源を利用</li>
+        <li>
+            <span class="rv">計算結果</span>/<span class="rv addV">参考値</span>
+        </li>
+    </ul>
+    <h3>使用方法</h3>
+    <ul class="text">
+        <li>(1) 計算諸元の平均圧力、行程容積、ガス温度及び作動ガスの種類を入力・選択する。※色付きは参考値で、多分間違えている可能性が高い。</li>
+        <li>(2) 実験式に基づいて、入力したエンジン仕様及び運転条件における最高軸出力及びその時のエンジン回転数が計算される。</li>
+    </ul>
+    <hr>
+    <h3>計算諸元</h3>
+
+    <form name="simple" id="in" METHOD="POST">
+        <ul>
+            <li><span class="it">作動空間平均圧力　P<sub>m</sub> ：</span>
+                <input type="number" name="Pm" value="0.1013"> (MPa)<span class="addText">* 大気圧は0.1013MPa/一般エンジン作動圧力は30
+                    MPa以下</span>
+                /膨張空間温度考慮<span class="rv addV" id="addBC"></span>(MPa)
+            </li>
+            <li><span class="it">膨張空間行程容積　V<sub>se</sub>：</span>
+                <input type="number" name="Vse" value="10"> (cm<sup>3</sup> / ml) /
+                シリンダー断面積<span class="rv addV" id="cylinder"></span> (cm<sup>2</sup>)/
+                直径<span class="rv addV" id="diameter"></span>(cm)/
+                行程<span class="rv addV" id="stroke"></span>(cm/気筒)/
+                ロッド長<span class="rv addV" id="rodL"></span>(cm/気筒)/
+                最低クランク長<span class="rv addV" id="minRc"></span>(cm/気筒)/
+                バッファ容量下限<span class="rv addV" id="bufRq"></span>(cm<sup>3</sup>)
+            </li>
+            <li><span class="it">膨張空間ガス温度　T<sub>e</sub> ：</span>
+                <input type="number" name="Te"> (℃)<span class="rv addV" id="TeK"></span> (K)/
+                膨張容積<span class="rv addV" id="addVal"></span>(cm<sup>3</sup>)/
+                膨張空間行程容積<span class="rv addV" id="VsepC"></span>(cm<sup>3</sup>/気筒)/
+                最低シリンダー長<span class="rv addV" id="cylinderL"></span>(cm/気筒)/
+
+            </li>
+            <li><span class="it">圧縮空間ガス温度　T<sub>c</sub> ：</span>
+                <input type="number" name="Tc"> (℃)<span class="rv addV" id="TcK"></span> (K) /
+                カルノー効率(論理最高熱効率)<span class="rv addV" id="carnotF"></span>(%)
+            </li>
+            <li><span class="it">作動ガス：</span>
+                <input type="radio" name="gas" id="Air" value="Air" checked="checked"><label for="Air">Air 空気</label>
+                <input type="radio" name="gas" id="N2" value="N2"><label for="N2">N<sub>2</sub> 窒素</label>
+                <input type="radio" name="gas" id="He" value="He"><label for="He">He ヘリウム</label>
+                <input type="radio" name="gas" id="h2" value="H2"><label for="h2">H<sub>2</sub> 水素</label>
+                <span class="addText">* 空気以外は通常高度な気密加工が必要で困難</span>
+            </li>
+            <li><span class="it">膨張空間気筒数：</span>
+                <input type="number" name="cylinderC" class="addV" value="1"> (気筒)/
+                ダブルアクティング型位相<span class="rv addV" id="DiffDeg"></span> (deg)
+                /再生器容量<span class="rv addV" id="reVpC"></span> (cm<sup>3</sup>/気筒)
+                <span class="addText">* ダブルアクティング型の場合は3気筒以上</span>
+            </li>
+            <li><span class="it">再生器容量：</span>
+                <input type="number" name="reV" class="addV" value="0"> (cm<sup>3</sup>)
+                /<span class="it its">充填率：</span>
+                <input type="number" name="reR" class="addV" value="10"> (%)
+                /<span class="it its">素材密度：</span>
+                <input type="number" name="reD" class="addV" value="7.68"> (g/cm<sup>3</sup>)
+                /<span class="it its">素材比熱：</span>
+                <input type="number" name="reCp" class="addV" value="461"> (J/kg℃)
+                <span class="addText">* スチールウール密度0.8~1.4</span>
+            </li>
+            <li><span class="it">熱交換器性能</span>
+                <span class="it its">発熱温度：</span><input type="number" name="inT" class="addV" value="100"> (℃)/
+                <span class="it its">外気温度：</span><input type="number" name="outT" class="addV" value="25"> (℃)/
+                <span class="it its">漏洩率</span><input type="number" name="leakR" class="addV" value="50"> (%)/
+                全体熱抵抗<span class="rv addV" id="Tr"></span> (℃/W)/
+                熱抵抗In<span class="rv addV" id="inTr"></span> (℃/W)/
+                熱抵抗Out<span class="rv addV" id="outTr"></span> (℃/W)
+                <span class="addText">* 390ml缶の熱抵抗は温度差1℃で約0.24</span>
+            </li>
+
+        </ul>
+    </form>
+    <hr>
+    <h3>計算結果</h3>
+    <ul>
+        <li><span class="rt">動粘性係数　ν<sub>lim</sub>：</span>
+            <span class="rv" id="visv"></span>
+            (m<sup>2</sup>/s)
+            <span class="addText">* 温度T<sub>e</sub> 及び圧力P<sub>m</sub>における作動ガスの動粘性係数</span>
+        </li>
+        <li><span class="rt">ガス定数　R：</span>
+            <span class="rv" id="Rv"></span> (J/kgK)<span class="addText">*
+                理想気体の状態方程式に含まれる気体特有定数。単位J/(kg・K)。これに気体分子量 [kg/mol] をかけると全ての理想気体で同一の一般気体定数：8.3145
+                J/(mol・K)となる。</span>
+        </li>
+        <li><span class="rt">無次元エンジン仕様　S<sup>*</sup>：</span>
+            <span class="rv" id="SSv"></span>
+        </li>
+        <li><span class="rt">最高無次元軸出力　L<sub>s</sub><sup>*</sup>：</span>
+            <span class="rv" id="LLsv"></span>
+        </li>
+        <li><span class="rt">無次元回転数　n<sup>*</sup>：</span>
+            <span class="rv" id="nnv"></span>
+        </li>
+        <li><span class="rt">最高軸出力　L<sub>s</sub>：</span>
+            <span class="rv" id="Lsv"></span> (W)
+            /腔圧<span class="rv addV" id="Pc"></span> (MPa)
+            /圧力変換効率<span class="rv addV" id="Pf"></span> (%)
+            /最低通過エネルギー<span class="rv addV" id="eFmin"></span> (W)
+            /要求熱源エネルギー<span class="rv addV" id="eFpri"></span> (W)
+        </li>
+        <li><span class="rt">エンジン回転数　N：</span>
+            <span class="rv" id="Nv"></span> (rpm)
+            /<span class="rv addV" id="Nvs"></span> (rps)
+            /通過エネルギー<span class="rv addV" id="eF"></span> (W)
+            /再生器分引く通過エネルギー<span class="rv addV" id="eFF"></span> (W)
+            /変換効率<span class="rv addV" id="eFr"></span> (%)
+            /再生器熱容量<span class="rv addV" id="rff"></span> (W/℃)
+        </li>
+        <li><span class="rt">ビール数　B<sub>n</sub>：</span>
+            <span class="rv" id="Bnv"></span>
+            <span class="addText">*
+                <span class="addRow">*
+                    高温度差(温度差100℃以上)エンジンのビール数の標準値は、0.15。大きいほど高効率なので、大きすぎる場合は何かおかしい。</span>
+                <span class="addRow">*Bn = L<sub>s</sub>/ P V N
+                    .(L<sub>s</sub>は軸出力（W）、Pは平均作動ガス圧力（bar/0.1MPa）、Vは膨張ピストンの行程容積（cm<sup>3</sup>）、Nはエンジン回転数（Hz/rps）)</span>
+            </span>
+        </li>
+        <li><span class="rt">ウエスト数　W<sub>n</sub>：</span>
+            <span class="rv" id="Wnv"></span><span class="addText">* ウエスト数の標準値は、0.25～0.35。</span>
+        </li>
+    </ul>
+    <hr>
+    <h3>元ネタ</h3>
+    <ul>
+        <li><a href="http://www.bekkoame.ne.jp/~khirata/academic/simple/simple.htm">スターリングエンジンの簡易性能予測法</a></li>
+        <li><a href="https://www.nmri.go.jp/archives/eng/khirata/stirling/docpaper/yosokuj.html">簡易性能予測法の提案</a></li>
+        <li><a href="http://www.bekkoame.ne.jp/~khirata/japanese/beale.htm">ビール数について</a></li>
+        <li><a href="https://www.nmri.go.jp/archives/eng/khirata/list/stirling/mech2004.pdf">スターリングエンジンの原理と開発事例</a></li>
+        <li><a href="https://www.nmri.go.jp/archives/eng/khirata/stirling/lowtemp/lowtemp.html">低温度差スターリングエンジンの要点と特徴</a>
+        <li><a href="https://www.jstage.jst.go.jp/article/jime1966/17/4/17_4_292/_pdf">位相差制御方式によるスターリング機関 回転数制御の研究*
+                1982</a>
+        </li>
+        <li><a href="https://www.nmri.go.jp/archives/eng/khirata/stirling/docpaper/hyoukaj.html">小型エンジンの性能評価</a>
+    </ul>
+    <script src="calc.js"></script>
+</body>
+
+</html>
