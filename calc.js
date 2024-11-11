@@ -146,7 +146,7 @@ class Calc {
 			Bn = ((Ls / N) * Minit) / Pm / Vse, //ビール数
 			Wn = Bn / TT, //ウエスト数
 			eFmin = Ls / carnotF,
-			outComeF = (eFmin / Calc.pint(f.leakR.value)) * 100,
+			outComeF = (eFmin / (100 - Calc.pint(f.leakR.value))) * 100,
 			inT = Calc.pint(f.inT.value) + ZERO_C,
 			outT = Calc.pint(f.outT.value) + ZERO_C,
 			Tr = (inT - outT) / outComeF,
